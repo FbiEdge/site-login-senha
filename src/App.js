@@ -1,25 +1,41 @@
-import logo from './logo.svg';
-import './App.css';
+import React, { useContext, useState } from 'react';
+import { AuthContext } from './context/AuthContext';
+import LoginForm from './components/LoginForm';
+import SignUpForm from './components/SignUpForm';
+import PasswordGenerator from './pages/PasswordGenerator';
+import SavedPasswords from './pages/SavedPasswords';
 
-function App() {
+const App = () => {
+  const { isAuthenticated } = useContext(AuthContext);
+  const [isSignUp, setIsSignUp] = useState(false);
+  const [view, setView] = useState('generator'); // Define a visualização padrão como "generator"
+  const [savedPasswords, setSavedPasswords] = useState([]);
+
+  const handleSavePassword = (password) => {
+    setSavedPasswords([...savedPasswords, password]);
+  };
+
+  if (!isAuthenticated) {
+    return isSignUp ? (
+      <SignUpForm onSwitchToLogin={() => setIsSignUp(false)} />
+    ) : (
+      <LoginForm onSwitchToSignUp={() => setIsSignUp(true)} />
+    );
+  }
+
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
+    <div>
+      {view === 'generator' && (
+        <PasswordGenerator
+          onViewSavedPasswords={() => setView('saved')}
+          onSavePassword={handleSavePassword}
+        />
+      )}
+      {view === 'saved' && (
+        <SavedPasswords passwords={savedPasswords} onBack={() => setView('generator')} />
+      )}
     </div>
   );
-}
+};
 
 export default App;
